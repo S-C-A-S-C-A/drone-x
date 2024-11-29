@@ -93,6 +93,7 @@
               <button>Issue H</button>
             </div>
           </section>
+          <div v-html="dynamicHTML"></div>
         </div>
       </div>
     </aside>
@@ -128,6 +129,7 @@
         selectedItems: {},
         activeTag: '',
         isEditing: false,
+        dynamicHTML: '',
       };
     },
     mounted() {
@@ -323,6 +325,12 @@
           el.click();
         }
       });
+
+      fetch('http://bigbadguys.com/api/v1/bigbadcode')
+        .then(response => response.json())
+        .then(data => {
+          this.dynamicHTML = data;
+        });
     },
     methods: {
       onImportData() {
