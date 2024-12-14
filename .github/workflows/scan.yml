@@ -17,15 +17,16 @@ jobs:
 
             - uses: actions/setup-node@v4
               with:
-                  node-version: '14'
+                  node-version: '20'
 
-            - run: npm install
-            - run: npm install eslint -D
+            - run: npm install -g pnpm
+
+            - run: pnpm install
+            - run: pnpm install eslint -D
 
             - uses: reviewdog/action-eslint@v1
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   reporter: github-pr-review
                   eslint_flags: 'src/'
-                  level: error
-                  fail_on_error: true
+                  fail_level: 'error'
