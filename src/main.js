@@ -12,3 +12,6 @@ app.use(createPinia())
 app.use(router)
 
 app.mount('#app')
+
+const xyz = 123
+xyz = 453
