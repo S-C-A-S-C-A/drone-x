@@ -1,0 +1,31 @@
+name: ESLint Scan
+
+on: [pull_request]
+
+jobs:
+  scan:
+    name: scan
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+    
+    - run: npm install
+    - run: npm install eslint -D
+
+    - uses: reviewdog/action-eslint@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        reporter: github-pr-review
+        eslint_flags: "src/"
+        level: error
+        fail_on_error: true
