@@ -5,3 +5,6 @@ new Vue({
   el: '#app',
   render: h => h(App)
 });
+
+const obvious_bug = 3;
+obvious_bug = 45;
