@@ -1,0 +1,35 @@
+# -*- mode: yaml -*-
+manifest:
+  version: 1.0
+
+automations:
+  enforce_pr_title:
+    if:
+      - {{ not (has.valid_pr_title) }}
+    run:
+      - action: request-changes@v1
+        args: 
+          comment: | 
+            All PRs must be titled according to our semantic naming policy: `<type>(<scope>): TICKET-<id> <short summary>`
+
+            Type must be one of the following:
+
+             * feat
+             * fix
+             * style
+             * refactor
+             * chore
+             * revert
+             * build
+             * ci
+             * docs
+             * perf
+             * test
+
+# +----------------------------------------------------------------------------+
+# | Custom Expressions                                                         |
+# | https://docs.gitstream.cm/how-it-works/#custom-expressions                 |
+# +----------------------------------------------------------------------------+
+
+has:
+  valid_pr_title: {{ pr.title | match(regex=r/^(feat|fix|style|refactor|chore|revert|build|ci|docs|perf|test)(\s{0,1}\([^)]+\))?\s{0,1}!{0,1}: \[TICKET-\d+\] .+$/) }}
