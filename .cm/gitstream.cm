@@ -5,11 +5,8 @@ manifest:
 automations:
   enforce_pr_title:
     if:
-      - {{ pr.title | match(regex=titlePolicy.titleRegex) | nope }}
+      - {{ not(has.valid_title) }}
     run:
-      - action: add-label@v1
-        args:
-          label: "missing-clickup-id"
       - action: add-comment@v1
         args:
           comment: |
@@ -34,5 +31,5 @@ automations:
 # | https://docs.gitstream.cm/how-it-works/#custom-expressions                 |
 # +----------------------------------------------------------------------------+
 
-titlePolicy:
-    titleRegex: r/\b(build|ci|docs|feature|fix)\b\s*\((common|core|elements|forms|http)\):\s*\w+.*/
+has:
+  valid_title: {{ pr.title | match(regex=r/^(feat|fix|style|refactor|chore|revert|build|ci|docs|perf|test)(\s{0,1}\([^)]+\))?\s{0,1}!{0,1}: \[TICKET-\d+\] .+$/) }}
