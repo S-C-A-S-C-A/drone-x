@@ -7,7 +7,8 @@ mergeable:
             regex: '^(feat|fix|style|refactor|chore|revert|build|ci|docs|perf|test)(\s{0,1}\([^)]+\))?\s{0,1}!{0,1}: \[TICKET-\d+\] .+$'
     pass:
       - do: labels
-        replace: ['Ready for Review']
+        delete: 'Non-Compliant'
+        add: 'Ready for Review'
     fail:
       - do: comment
         payload:
@@ -16,4 +17,5 @@ mergeable:
             <h2>PR title doesn't follow conventions</h2>
             <h3>Please ensure the PR is titled in the format <prefix>(<optional scope>): [TICKET-<id>] <short description></h3>
       - do: labels
-        replace: ['Non-Compliant']
+        delete: 'Ready for Review'
+        add: 'Non-Compliant'
