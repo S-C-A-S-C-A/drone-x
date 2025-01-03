@@ -27,4 +27,4 @@ automations:
              * forms
              * http 
 titlePolicy:
-    titleRegex: r/\b(build|ci|docs|feature|fix)\b\s*\((common|core|elements|forms|http)\):\s*\w+.*/
+    titleRegex: r/\b(feat|fix|style|refactor|chore|revert|build|ci|docs|perf|test)\b\s*\(?.*\)?!?:\s?\[TICKET-\d+\]\s?\w+.*/
