@@ -9,22 +9,20 @@ automations:
       - action: request-changes@v1
         args: 
           comment: | 
-            All PRs must be titled according to our semantic naming policy: `<type>(<scope>): <short summary>`
+            All PRs must be titled according to our semantic naming policy: `<type>(<optional scope(s)>): TICKET-<id> <short summary>`
 
             Type must be one of the following:
 
-             * build
-             * ci 
-             * docs
-             * feature
+             * feat
              * fix
-
-            Scope must be one of the following:
-
-             * common
-             * core
-             * elements
-             * forms
-             * http 
+             * style
+             * refactor
+             * chore
+             * revert
+             * build
+             * ci
+             * docs
+             * perf
+             * test
 titlePolicy:
     titleRegex: r/\b(feat|fix|style|refactor|chore|revert|build|ci|docs|perf|test)\b\s*\(?.*\)?!?:\s?\[TICKET-\d+\]\s?\w+.*/
