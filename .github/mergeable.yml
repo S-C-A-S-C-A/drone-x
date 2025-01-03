@@ -1,0 +1,21 @@
+version: 2
+mergeable:
+  - when: pull_request.opened, pull_request.reopened, pull_request.synchronize, pull_request.edited
+    validate:
+      - do: title
+        message:
+            regex: '^(feat|fix|style|refactor|chore|revert|build|ci|docs|perf|test)(\s{0,1}\([^)]+\))?\s{0,1}!{0,1}: \[TICKET-\d+\] .+$'
+    pass:
+      - do: labels
+        delete: 'Non-Compliant'
+        add: 'Ready for Review'
+    fail:
+      - do: comment
+        payload:
+          body: >
+            :warning:
+            <h2>PR title doesn't follow conventions</h2>
+            <h3>Please ensure the PR is titled in the format <prefix>(<optional scope>): [TICKET-<id>] <short description></h3>
+      - do: labels
+        delete: 'Ready for Review'
+        add: 'Non-Compliant'
