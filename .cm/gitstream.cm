@@ -35,4 +35,4 @@ automations:
 # +----------------------------------------------------------------------------+
 
 titlePolicy:
-    titleRegex: r/^(feat|fix|style|refactor|chore|revert|build|ci|docs|perf|test)(\s{0,1}\([^)]+\))?\s{0,1}!{0,1}: \[TICKET-\d+\] .+$/
+    titleRegex: r/\b(build|ci|docs|feature|fix)\b\s*\((common|core|elements|forms|http)\):\s*\w+.*/
