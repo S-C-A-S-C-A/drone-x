@@ -1,0 +1,38 @@
+# -*- mode: yaml -*-
+manifest:
+  version: 1.0
+
+automations:
+  enforce_pr_title:
+    if:
+      - {{ has.invalid_title }}
+    run:
+      - action: add-label@v1
+        args:
+          label: "missing-clickup-id"
+      - action: add-comment@v1
+        args:
+          comment: |
+            All PRs must be titled according to our semantic naming policy: `<type>(<scope>): TICKET-<id> <short summary>`
+
+            Type must be one of the following:
+
+             * feat
+             * fix
+             * style
+             * refactor
+             * chore
+             * revert
+             * build
+             * ci
+             * docs
+             * perf
+             * test
+
+# +----------------------------------------------------------------------------+
+# | Custom Expressions                                                         |
+# | https://docs.gitstream.cm/how-it-works/#custom-expressions                 |
+# +----------------------------------------------------------------------------+
+
+has:
+  invalid_title: {{ pr.title | match(regex=r/^(feat|fix|style|refactor|chore|revert|build|ci|docs|perf|test)(\s{0,1}\([^)]+\))?\s{0,1}!{0,1}: \[TICKET-\d+\] .+$/) | every }}
