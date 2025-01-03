@@ -24,5 +24,16 @@ automations:
              * docs
              * perf
              * test
+
+            Valid:
+            
+             * `feat: [TICKET-12345] add new feature`
+             * `fix(forms): [TICKET-23456] fix that feature`
+
+            Invalid:
+            
+             * `feat: add new feature`
+             * `TICKET-23456 fix that feature`
+             * `fix that feature TICKET-34567`
 titlePolicy:
     titleRegex: r/\b(feat|fix|style|refactor|chore|revert|build|ci|docs|perf|test)\b\s*\(?.*\)?!?:\s?\[TICKET-\d+\]\s?\w+.*/
