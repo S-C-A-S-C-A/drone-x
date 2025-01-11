@@ -1,0 +1,131 @@
+name: AUTOMATIC - Mergeback
+
+on:
+  pull_request:
+    branches:
+      - release/qa
+      - release/pre-production
+    types:
+      - closed
+
+jobs:
+  autopr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: echo "⚡ This job was triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 Running job on a ${{ runner.os }} server."
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - run: echo "🐑 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🚀 The workflow is now ready to start."
+
+      - name: Create PRs for hotfix
+        if: ${{ (github.event.pull_request.merged == true) && (contains(github.event.pull_request.labels.*.name, 'hotfix')) }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ADMIN_PAT }}  # Using PAT with admin rights
+          script: |
+            const createAndMergePR = async (fromBranch, toBranch) => {
+              // Create PR
+              const prResponse = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `chore: merge ${fromBranch} into ${toBranch}`,
+                body: `⚠️ AUTOMATED HOTFIX MERGE ⚠️\n\nThis PR was automatically created because another PR with the label 'hotfix' was merged into branch '${fromBranch}'. Branch protection rules are being bypassed due to the critical nature of this hotfix.\n\nOriginal PR: ${context.payload.pull_request.html_url}\n\nDO NOT SQUASH and merge this PR.`,
+                head: fromBranch,
+                base: toBranch
+              });
+              
+              const prNumber = prResponse.data.number;
+              console.log(`Created PR #${prNumber} from ${fromBranch} to ${toBranch}`);
+              
+              // Add labels
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                labels: ['automerge', 'automated-hotfix']
+              });
+              console.log(`Added labels to PR #${prNumber}`);
+              
+              // For main branch, attempt immediate merge
+              if (toBranch === 'main') {
+                try {
+                  await github.rest.pulls.merge({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: prNumber,
+                    merge_method: 'merge',
+                    commit_title: `hotfix: automated merge from ${fromBranch} to ${toBranch} 🤖`,
+                    commit_message: `Automated hotfix merge.\nBypass approvals due to critical nature.\nOriginal PR: ${context.payload.pull_request.html_url}`
+                  });
+                  console.log(`Successfully merged PR #${prNumber}`);
+                } catch (error) {
+                  console.error(`Failed to merge PR #${prNumber}: ${error.message}`);
+                }
+              } else {
+                // For other branches, use regular auto-merge
+                try {
+                  console.log('%cgithub.rest.pulls', 'font-weight: bold; color: tomato;', github.rest.pulls);
+                  await github.rest.pulls.enableAutoMerge({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: prNumber,
+                    merge_method: 'merge'
+                  });
+                  console.log(`Enabled auto-merge for PR #${prNumber}`);
+                } catch (error) {
+                  console.log(`Auto-merge enablement failed: ${error.message}`);
+                }
+              }
+            };
+
+            // Create PRs for both production and main
+            await createAndMergePR('release/pre-production', 'release/production');
+            await createAndMergePR('release/pre-production', 'main');
+
+      - name: Create PRs for cherry-pick
+        if: ${{ (github.event.pull_request.merged == true) && (contains(github.event.pull_request.labels.*.name, 'cherry')) }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const createPR = async (fromBranch, toBranch) => {
+              const response = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `chore: merge ${fromBranch} into ${toBranch}`,
+                body: `This PR was automatically created because another PR with the label 'cherry' was merged into branch '${fromBranch}'. DO NOT SQUASH and merge this PR.`,
+                head: fromBranch,
+                base: toBranch
+              });
+              console.log(`Created PR #${response.data.number} from ${fromBranch} to ${toBranch}`);
+            };
+
+            // Create PRs for both production and main
+            await createPR('release/pre-production', 'release/production');
+            await createPR('release/pre-production', 'main');
+
+      - name: Create PR for post-cutoff
+        if: ${{ (github.event.pull_request.merged == true) && (contains(github.event.pull_request.labels.*.name, 'post-cutoff')) }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const createPR = async (fromBranch, toBranch) => {
+              const response = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `chore: merge ${fromBranch} into ${toBranch}`,
+                body: `This PR was automatically created because another PR with the label 'post-cutoff' was merged into branch '${fromBranch}'. DO NOT SQUASH and merge this PR.`,
+                head: fromBranch,
+                base: toBranch
+              });
+              console.log(`Created PR #${response.data.number} from ${fromBranch} to ${toBranch}`);
+            };
+
+            // Create PR from qa to main
+            await createPR('release/qa', 'main');
+
+      - run: echo "⏹ End of job. Status - ${{ job.status }}."
